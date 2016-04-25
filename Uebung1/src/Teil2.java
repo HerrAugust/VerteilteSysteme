@@ -10,10 +10,10 @@ import java.util.Scanner;
 
 public class Teil2 {
 	
-    static int anzahl = 4000000; //number of found prime numbers
+    static int anzahl = 0; //number of found prime numbers
     
     public static void run() {
-    	int max = 0;
+    	int max = 4000000;
         Scanner c = new Scanner(System.in);
 
         System.out.println("Please write your max: ");
