@@ -20,11 +20,11 @@ public class Teil3 {
     	int max = 0;
         Scanner c = new Scanner(System.in);
 
-        System.out.println("Bitte schreiben Sie seine Obergranz: ");
+        System.out.println("Please write your max: ");
         try {
         	max = c.nextInt();
-        	if(max <= 0) {
-                System.out.println("You must enter a number greter than 0. Restarting...");
+        	if(max <= 1) {
+                System.out.println("You must enter a number greter than 1. Restarting...");
                 Teil3.run();
                 return;
             }
