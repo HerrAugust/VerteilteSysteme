@@ -5,8 +5,10 @@ public class ThreadedCounter implements Runnable {
 	public long elapsedTimeForThisThread;
 	
 	/**
-	 * Must be called before to start the thread
-	 * @param r
+	 * Must be called before to start the thread.
+	 * It is needed to let this thread know the range in which it should do its computation (see run()).
+	 * @param minp is the minimum of the calculated range
+	 * @param maxp is the maximum of the range
 	 */
 	public ThreadedCounter(int minp, int maxp) {
 		this.min = minp;
@@ -14,6 +16,7 @@ public class ThreadedCounter implements Runnable {
 	}
 	
 	/**
+	 * This is the core of this class.
 	 * We count how many prime numbers there are between [i; j] (arguments passed by AtomicReference)
 	 */
 	@Override
