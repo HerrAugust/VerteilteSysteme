@@ -43,7 +43,7 @@ public class Teil3 {
         	System.out.println(max + " is NOT prime.");
         }
         //Determine the number of prime numbers between 1 and max.
-        //Here threads are used. Using Runnable and AtomicBoolean
+        //Here threads are used. Using Runnable interface and Thread class
         int anzahl = 0;
         if(max == 1)
         	anzahl = 1;
