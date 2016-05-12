@@ -1,51 +1,45 @@
 package Server;
-import java.util.List;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.LinkedList;
 
-public class Server {
+public class Match {
 
-	List<Match> matches = new LinkedList<Match>();
+	private Client clientA, clientB;
 	
-	public static void main(String[] args) throws IOException {
-		String port = args[0];
-		
-		/*
-		 * Beim Start des Servers einstellbarer Port (z.B. über Kommandozeilenargument)
-		 * mit Validierung, dass dieser im Bereich zwischen 8000 und 8100 liegt.
-		 */
-		int p = 0;
-		try {
-			p = Integer.parseInt(port);
-		}catch(NumberFormatException e) {
-			System.err.println("You must enter a number for port");
-		}
-		if(p < 10000 || p > 10100) {
-			System.err.println("You must insert a port s.t. 10000 < port < 10100");
-		}
-		
-		//This is the socket of this server:
-		ServerSocket ss = null;
-		try {
-			ss = new ServerSocket(p);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		System.out.println("Server waiting on this coordinate: (" + ss.getInetAddress() + ", " + ss.getLocalPort() + ")");
-		
-		new 
-		
+	public Match(Client c1, Client c2) {
+		this.clientA = c1;
+		this.clientB = c2;
 	}
 	
-	private Match allMatchesAreFull() {
-		for(Match m : this.matches) {
-			if(m.isComplete() == false) {
-				return m;
-			}
+	public boolean remove(Client c) {
+		if(this.clientA == c) {
+			this.clientA = null;
+			return true;
 		}
-		return null;
+		if(this.clientB == c) {
+			this.clientB = null;
+			return true;
+		}
+		return false;
 	}
-
+	 
+	public boolean join(Client c) {
+		if(c == null)
+			return false;
+		
+		if(this.isComplete())
+			return false;
+		
+		if(this.clientA == null)
+			this.clientA = c;
+		else
+			this.clientB = c;
+		return false;
+	}
+	
+	public boolean isComplete() {
+		if(this.clientA == null && this.clientB == null) {
+			return true;
+		}
+		return false;
+	}
+	
 }
