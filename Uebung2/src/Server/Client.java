@@ -7,11 +7,11 @@ import java.net.Socket;
 
 public class Client {
 
-	private Socket s;
+	private Socket s; //socket corresponding to this client
 	private DataOutputStream w;
 	private DataInputStream r;
-	private Match m;
-	private String currentChoice;
+	private Match m; //match to which this client belongs
+	private String currentChoice; //current choice for this client, among papier, stein and schore. It get renewed for each mini match
 	
 	public Client(Socket s) {
 		this.s = s;
@@ -25,10 +25,18 @@ public class Client {
 		}
 	}
 	
+	/**
+	 * Sets the match to which this client belongs
+	 */
 	public void setMatch(Match m) {
 		this.m = m;
 	}
 	
+	/**
+	 * Set current choice for this mini match.
+	 * @param choice choice for this mini match, among stein, schere and papier
+	 * @return false if choice is neither stein, nor schere, nor papier
+	 */
 	public boolean setCurrentChoice(String choice) {
 		choice = choice.toLowerCase();
 		if(choice.equals("schere") || choice.equals("stein") || choice.equals("papier")) {
@@ -50,10 +58,18 @@ public class Client {
 		return this.s;
 	}
 	
+	/**
+	 * Gets the port from which this client requested the connection
+	 */
 	public int getPort() {
 		return this.s.getPort();
 	}
 	
+	/**
+	 * Used to send a message to this client (synchrunous)
+	 * @param msg the message to send
+	 * @return true if message was sent
+	 */
 	public boolean writeMessage(String msg) {
 		try {
 			w.write(msg.getBytes());
@@ -64,6 +80,10 @@ public class Client {
 		return true;
 	}
 	
+	/**
+	 * Used to retrive a message from this client
+	 * @return the message sent (synchronous)
+	 */
 	public String readMessage() {
 		try {
 			return r.readUTF();
