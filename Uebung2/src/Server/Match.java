@@ -6,8 +6,6 @@
 
 package Server;
 
-import java.net.InetAddress;
-
 public class Match implements Runnable {
 
 	private Client clientA, clientB;
@@ -72,10 +70,10 @@ public class Match implements Runnable {
 	 * True if this match has both client A and B
 	 */
 	public boolean isComplete() {
-		if(this.clientA == null && this.clientB == null) {
-			return true;
+		if(this.clientA == null || this.clientB == null) {
+			return false;
 		}
-		return false;
+		return true;
 	}
 	
 	/**
@@ -111,7 +109,7 @@ public class Match implements Runnable {
 		switch(a) {
 		case "papier":
 			switch(b) {
-			case "schore":
+			case "schere":
 				winner = this.clientB;
 				break;
 			case "stein":
@@ -119,7 +117,7 @@ public class Match implements Runnable {
 				break;
 			}
 			break;
-		case "schore":
+		case "schere":
 			switch(b) {
 			case "papier":
 				winner = this.clientA;
@@ -131,7 +129,7 @@ public class Match implements Runnable {
 			break;
 		case "stein":
 			switch(b) {
-			case "schore":
+			case "schere":
 				winner = this.clientA;
 				break;
 			case "papier":
@@ -165,13 +163,23 @@ public class Match implements Runnable {
 	 * A match is composed of a potentially infinite number of mini matches (till when a client decides to get out). 
 	 */
 	public void run() {
-		this.clientA.writeMessage("Welcome to this match! Your enemy is on port " + this.clientB.getPort());
-		this.clientB.writeMessage("Welcome to this match! Your enemy is on port " + this.clientA.getPort());
+		this.clientA.writeMessage("Welcome to this match! Your port (A) is " + this.clientA.getPort() + "; your enemy port is " + this.clientB.getPort());
+		this.clientB.writeMessage("Welcome to this match! Your port (B) is " + this.clientB.getPort() + "; your enemy port is " + this.clientA.getPort());
 		
 		//Wait for players choices (synchronously)
 		while(true) {
-			String achoice = this.clientA.readMessage();
-			String bchoice = this.clientB.readMessage();
+			String achoice = null;
+			achoice = this.clientA.readMessage();
+			if(achoice == null) {
+				this.finalize();
+				return;
+			}
+			String bchoice = null;
+			bchoice = this.clientB.readMessage();
+			if(bchoice == null) {
+				this.finalize();
+				return;
+			}
 			if(achoice.equals("STOP") || bchoice.equals("STOP")) {
 				this.clientB.writeMessage("A client requested to terminate match. Bye bye!");
 				this.clientA.writeMessage("A client requested to terminate match. Bye bye!");
@@ -184,20 +192,39 @@ public class Match implements Runnable {
 			if(isokA && isokB)
 			{
 				Client winner = this.getWinner();
+				if(winner == null) {
+					boolean a = this.clientA.writeMessage("No winner. Your choice: " + this.clientA.getCurrentChoice() + "; your enemy chose: " + this.clientB.getCurrentChoice());
+					this.clientA.add1Point();
+					boolean b = this.clientB.writeMessage("No winner. Your choice: " + this.clientB.getCurrentChoice() + "; your enemy chose: " + this.clientA.getCurrentChoice());
+					if(!a || !b) { //if server cannot send/read message, it assumes that the client is terminated (CTRL+C, etc) and terminates the match 
+						this.finalize();
+					}
+					continue;
+				}
 				if(winner == clientA) {
 					boolean a = this.clientA.writeMessage("You won. Your choice: " + this.clientA.getCurrentChoice() + "; your enemy chose: " + this.clientB.getCurrentChoice());
+					this.clientA.add1Point();
 					boolean b = this.clientB.writeMessage("You lost. Your choice: " + this.clientB.getCurrentChoice() + "; your enemy chose: " + this.clientA.getCurrentChoice());
-					if(!a || !b) {
+					if(!a || !b) { //if server cannot send/read message, it assumes that the client is terminated (CTRL+C, etc) and terminates the match 
 						this.finalize();
 					}
 				}
 				else {
 					boolean b = this.clientB.writeMessage("You won. Your choice: " + this.clientB.getCurrentChoice() + "; your enemy chose: " + this.clientA.getCurrentChoice());
+					this.clientB.add1Point();
 					boolean a = this.clientA.writeMessage("You lost. Your choice: " + this.clientA.getCurrentChoice() + "; your enemy chose: " + this.clientB.getCurrentChoice());
 					if(!a || !b) {
 						this.finalize();
 					}
 				}
+				
+				boolean a = this.clientA.writeMessage("Current points: you = " + this.clientA.getPoints() + "; your enemy = " + this.clientB.getPoints());
+				this.clientA.add1Point();
+				boolean b = this.clientB.writeMessage("Current points: you = " + this.clientB.getPoints() + "; your enemy = " + this.clientA.getPoints());
+				if(!a || !b) { //if server cannot send/read message, it assumes that the client is terminated (CTRL+C, etc) and terminates the match 
+					this.finalize();
+				}
+				
 			}
 		}
 	}

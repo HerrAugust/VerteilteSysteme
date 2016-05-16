@@ -8,17 +8,44 @@ import java.util.LinkedList;
 public class Server {
 
 	private static List<Match> matches = new LinkedList<Match>();
+	private static ServerSocket ss;
 	
 	public static void removeMatch(int ID) {
 		for(Match m : Server.matches) {
 			if(m.getID() == ID) {
 				Server.matches.remove(m);
-				return;
+				break;
 			}
 		}
 	}
 	
+	@Override
+	public void finalize() throws IOException {
+		for(Match m : matches) { //closes connection with each clients 
+			m.finalize();
+		}
+		ss.close(); //closes server socket
+	}
+	
 	public static void main(String[] args) throws IOException {
+		if(args.length == 0) {
+			System.err.println("You must indicate a valid port");
+			return;
+		}
+		
+		/**
+		 * Handler for CTRL-C
+		 */
+		Runtime.getRuntime().addShutdownHook(new Thread() {
+		    public void run() { 
+		    	try {
+					this.finalize();
+				} catch (Throwable e) {
+					e.printStackTrace();
+				}
+		    }
+		 });
+		
 		String port = args[0];
 		
 		/*
@@ -36,7 +63,7 @@ public class Server {
 		}
 			
 		//This is the socket of this server:
-		ServerSocket ss = null;
+		ss = null;
 		try {
 			ss = new ServerSocket(p);
 		} catch (IOException e) {
@@ -60,16 +87,20 @@ public class Server {
 			if(freeMatch == null) { //if no match with only one player is found, create a new one
 				freeMatch = new Match();
 				freeMatch.join(newClient);
-				matches.add(freeMatch);
+				Server.matches.add(freeMatch);
 			}
 			else {
 				freeMatch.join(newClient);
 			}
+			newClient.setMatch(freeMatch);
 			newClient.writeMessage("You have just been assigned to a match.");
 			//END find a match
 			
 			//start match
 			if(freeMatch.isComplete()) {
+				Client[] c = freeMatch.getPartecipants(null);
+				c[0].writeMessage("Match starting");
+				c[1].writeMessage("Match starting");
 				Thread t = new Thread(freeMatch);
 				t.start();
 			}

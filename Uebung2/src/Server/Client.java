@@ -1,23 +1,26 @@
 package Server;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class Client {
 
 	private Socket s; //socket corresponding to this client
 	private DataOutputStream w;
-	private DataInputStream r;
+	private BufferedReader r;
 	private Match m; //match to which this client belongs
 	private String currentChoice; //current choice for this client, among papier, stein and schore. It get renewed for each mini match
+	private short points;
 	
 	public Client(Socket s) {
 		this.s = s;
 		try {
 			this.w = new DataOutputStream(s.getOutputStream());
-			this.r = new DataInputStream(s.getInputStream());
+			this.r = new BufferedReader(new InputStreamReader(s.getInputStream()));
 		}
 		catch(IOException e) {
 			System.err.println("Client with port " + s.getPort() + " got an error in Sever.Client costructor");
@@ -30,6 +33,14 @@ public class Client {
 	 */
 	public void setMatch(Match m) {
 		this.m = m;
+	}
+	
+	public void add1Point() {
+		this.points++;
+	}
+	
+	public short getPoints() {
+		return this.points;
 	}
 	
 	/**
@@ -72,7 +83,9 @@ public class Client {
 	 */
 	public boolean writeMessage(String msg) {
 		try {
-			w.write(msg.getBytes());
+			msg = msg + '\n';
+			this.w.write(msg.getBytes());
+			this.w.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
@@ -86,9 +99,8 @@ public class Client {
 	 */
 	public String readMessage() {
 		try {
-			return r.readUTF();
+			return this.r.readLine();
 		} catch (IOException e) {
-			e.printStackTrace();
 			return null;
 		}
 	}
