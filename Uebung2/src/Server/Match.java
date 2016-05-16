@@ -6,16 +6,29 @@
 
 package Server;
 
+import java.net.InetAddress;
+
 public class Match implements Runnable {
 
 	private Client clientA, clientB;
+	private static int ID;
 	
 	/**
 	 * Creates a match. A match is initially with no player because connection is synchronous: each
 	 * time a client connects to the server, it is soon added to a match, without waiting for the enemy.
 	 */
 	public Match() {
-		
+		this.ID++;
+	}
+	
+	public int getID() {
+		return this.ID;
+	}
+	
+	public boolean equals(Match a) {
+		if(this.ID == a.ID)
+			return true;
+		return false;
 	}
 
 	/**
@@ -131,6 +144,18 @@ public class Match implements Runnable {
 		}
 		return winner;
 	}
+	
+	@Override
+	/**
+	 * Removes this match.
+	 * Both connections with clientA and B get closed.
+	 */
+	public void finalize() { 
+		Server.removeMatch(this.getID());
+		this.clientA.finalize();
+		this.clientB.finalize();
+		
+	}
 
 	@Override
 	/**
@@ -145,8 +170,16 @@ public class Match implements Runnable {
 		
 		//Wait for players choices (synchronously)
 		while(true) {
-			boolean isokA = this.clientA.setCurrentChoice(this.clientA.readMessage());
-			boolean isokB = this.clientB.setCurrentChoice(this.clientB.readMessage());
+			String achoice = this.clientA.readMessage();
+			String bchoice = this.clientB.readMessage();
+			if(achoice.equals("STOP") || bchoice.equals("STOP")) {
+				this.clientB.writeMessage("A client requested to terminate match. Bye bye!");
+				this.clientA.writeMessage("A client requested to terminate match. Bye bye!");
+				this.finalize();
+				return;
+			}
+			boolean isokA = this.clientA.setCurrentChoice(achoice);
+			boolean isokB = this.clientB.setCurrentChoice(bchoice);
 			
 			if(isokA && isokB)
 			{
@@ -154,10 +187,16 @@ public class Match implements Runnable {
 				if(winner == clientA) {
 					boolean a = this.clientA.writeMessage("You won. Your choice: " + this.clientA.getCurrentChoice() + "; your enemy chose: " + this.clientB.getCurrentChoice());
 					boolean b = this.clientB.writeMessage("You lost. Your choice: " + this.clientB.getCurrentChoice() + "; your enemy chose: " + this.clientA.getCurrentChoice());
+					if(!a || !b) {
+						this.finalize();
+					}
 				}
 				else {
 					boolean b = this.clientB.writeMessage("You won. Your choice: " + this.clientB.getCurrentChoice() + "; your enemy chose: " + this.clientA.getCurrentChoice());
 					boolean a = this.clientA.writeMessage("You lost. Your choice: " + this.clientA.getCurrentChoice() + "; your enemy chose: " + this.clientB.getCurrentChoice());
+					if(!a || !b) {
+						this.finalize();
+					}
 				}
 			}
 		}

@@ -98,5 +98,16 @@ public class Client {
 			return true;
 		return false;
 	}
+	
+	public void finalize() {
+		try {
+			r.close();
+			w.close();
+			s.close();
+		}
+		catch(IOException e) {
+			// Auto generated
+		}
+	}
 
 }

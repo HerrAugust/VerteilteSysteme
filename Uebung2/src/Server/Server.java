@@ -9,6 +9,15 @@ public class Server {
 
 	private static List<Match> matches = new LinkedList<Match>();
 	
+	public static void removeMatch(int ID) {
+		for(Match m : Server.matches) {
+			if(m.getID() == ID) {
+				Server.matches.remove(m);
+				return;
+			}
+		}
+	}
+	
 	public static void main(String[] args) throws IOException {
 		String port = args[0];
 		
