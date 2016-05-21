@@ -27,8 +27,8 @@ public class Server {
 		ss.close(); //closes server socket
 	}
 	
-	public static void main(String[] args) throws IOException {
-		if(args.length == 0) {
+	public static void main(String[] args) {
+		if(args.length != 1) {
 			System.err.println("You must indicate a valid port");
 			return;
 		}
@@ -73,7 +73,14 @@ public class Server {
 		
 		//As a new connection is required, server accepts it
 		while(true) {
-			Socket newconn = ss.accept();
+			Socket newconn = null;
+			try {
+			newconn = ss.accept();
+			}
+			catch(IOException e) {
+				System.err.println("Could not accept client connection. Trying again (forever)");
+				continue;
+			}
 			
 			//find a match and assign to that match
 			Match freeMatch = null;
