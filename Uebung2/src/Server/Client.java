@@ -87,6 +87,7 @@ public class Client {
 			this.w.write(msg.getBytes());
 			this.w.flush();
 		} catch (IOException e) {
+			System.out.println("Error while sending message");
 			e.printStackTrace();
 			return false;
 		}
@@ -115,7 +116,8 @@ public class Client {
 		try {
 			r.close();
 			w.close();
-			s.close();
+			if(s.isClosed() == false)
+				s.close();
 		}
 		catch(IOException e) {
 			// Auto generated

@@ -194,14 +194,12 @@ public class Match implements Runnable {
 				Client winner = this.getWinner();
 				if(winner == null) {
 					boolean a = this.clientA.writeMessage("No winner. Your choice: " + this.clientA.getCurrentChoice() + "; your enemy chose: " + this.clientB.getCurrentChoice());
-					this.clientA.add1Point();
 					boolean b = this.clientB.writeMessage("No winner. Your choice: " + this.clientB.getCurrentChoice() + "; your enemy chose: " + this.clientA.getCurrentChoice());
 					if(!a || !b) { //if server cannot send/read message, it assumes that the client is terminated (CTRL+C, etc) and terminates the match 
 						this.finalize();
 					}
-					continue;
 				}
-				if(winner == clientA) {
+				else if(winner == clientA) {
 					boolean a = this.clientA.writeMessage("You won. Your choice: " + this.clientA.getCurrentChoice() + "; your enemy chose: " + this.clientB.getCurrentChoice());
 					this.clientA.add1Point();
 					boolean b = this.clientB.writeMessage("You lost. Your choice: " + this.clientB.getCurrentChoice() + "; your enemy chose: " + this.clientA.getCurrentChoice());
@@ -219,7 +217,6 @@ public class Match implements Runnable {
 				}
 				
 				boolean a = this.clientA.writeMessage("Current points: you = " + this.clientA.getPoints() + "; your enemy = " + this.clientB.getPoints());
-				this.clientA.add1Point();
 				boolean b = this.clientB.writeMessage("Current points: you = " + this.clientB.getPoints() + "; your enemy = " + this.clientA.getPoints());
 				if(!a || !b) { //if server cannot send/read message, it assumes that the client is terminated (CTRL+C, etc) and terminates the match 
 					this.finalize();

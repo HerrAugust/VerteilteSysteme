@@ -1,6 +1,7 @@
 package Server;
 import java.util.List;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -11,6 +12,8 @@ public class Server {
 	private static ServerSocket ss;
 	
 	public static void removeMatch(int ID) {
+		System.out.println("Open matches = " + Server.matches.size());
+		System.out.println("Removing server ID = " + ID);
 		for(Match m : Server.matches) {
 			if(m.getID() == ID) {
 				Server.matches.remove(m);
@@ -21,6 +24,7 @@ public class Server {
 	
 	@Override
 	public void finalize() throws IOException {
+		System.out.println("Finalizing...");
 		for(Match m : matches) { //closes connection with each clients 
 			m.finalize();
 		}
@@ -28,8 +32,9 @@ public class Server {
 	}
 	
 	public static void main(String[] args) {
+		System.out.println("Server PID: " + ManagementFactory.getRuntimeMXBean().getName());
 		if(args.length != 1) {
-			System.err.println("You must indicate a valid port");
+			System.err.println("You must indicate only a valid port");
 			return;
 		}
 		
