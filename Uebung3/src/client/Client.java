@@ -10,6 +10,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.ImageFilter;
 import java.io.File;
+import java.io.OutputStreamWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.net.URL;
 
 import javax.swing.GroupLayout;
@@ -27,8 +30,12 @@ public class Client implements ActionListener {
 	
 	private JFrame frame;
 	private JLabel path, loadingGIF;
+	private String IPServer;
+	private int portServer;
 	
-	public Client() {
+	public Client(String[] args) {
+		this.IPServer = args[0];
+		this.portServer = Integer.parseInt(args[1]);
 		this.createGUI();
 	}
 	
@@ -96,6 +103,15 @@ public class Client implements ActionListener {
 				    path.setText(file.getName());
 				}
 				break;
+			case "send":
+				//Communicate image to server (through stub)
+				Socket s = new Socket(this.IPServer, this.portServer);
+				OutputStreamWriter w = new OutputStreamWriter(s.getOutputStream());
+				//Wait synchronously for the modified image
+				
+				//Show it on screen
+				new Page2(editedImage);
+				break;
 			default: break;
 		}
     }
@@ -104,7 +120,12 @@ public class Client implements ActionListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		new Client();
+		if(args.length != 2) {
+			System.err.println("Error, expected (IP server, Port server)");
+			return;
+		}
+		
+		new Client(args);
 
 	}
 
