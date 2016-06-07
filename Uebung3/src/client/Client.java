@@ -1,52 +1,42 @@
 package client;
 
-import graphics.ImageProcessor;
-import graphics.SerializableImage;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageFilter;
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.MalformedURLException;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.net.URL;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
+import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 
 import javax.imageio.ImageIO;
 import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+
+
+import common.ImageProcessor;
+import common.SerializableImage;
 
 public class Client implements ActionListener {
 	
 	private JFrame frame;
 	private JLabel path, loadingGIF;
-	private String IPServer;
 	private int portServer;
 	private BufferedImage myimg;
 	
 	public Client(String[] args) {
-		this.IPServer = args[0];
-		this.portServer = Integer.parseInt(args[1]);
+		this.portServer = Integer.parseInt(args[0]);
 		this.createGUI();
 	}
 	
@@ -124,10 +114,12 @@ public class Client implements ActionListener {
 			case "send":
 				//IMPORTANT PART
 				//Communicate image (serialized) to server (through stub) and wait synchronously for result
+				if(System.getSecurityManager() == null) 
+					System.setSecurityManager(new RMISecurityManager());
 				ImageProcessor server = null;
 				SerializableImage editedImage = null;
 				try {
-					server = (ImageProcessor) Naming.lookup("rmi://" + this.IPServer + ":" + this.portServer + "/ImageProcessor");
+					server = (ImageProcessor) Naming.lookup("rmi://localhost:" + this.portServer + "/ImageProcessor");
 					SerializableImage source = new SerializableImage();
 					source.setImage(this.myimg);
 					editedImage = server.convert(source);
@@ -157,8 +149,8 @@ public class Client implements ActionListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if(args.length != 2) {
-			System.err.println("Error, expected (IP server, Port server)");
+		if(args.length != 1) {
+			System.err.println("Error, expected Port of server");
 			return;
 		}
 		

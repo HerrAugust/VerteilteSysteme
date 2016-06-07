@@ -3,11 +3,18 @@ package server;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 
-import graphics.ImageProcessor;
-import graphics.SerializableImage;
+import common.ImageProcessor;
+import common.SerializableImage;
 
-public class ImageProcessorImpl implements ImageProcessor {
+public class ImageProcessorImpl extends UnicastRemoteObject implements ImageProcessor {
+
+	private static final long serialVersionUID = 2972039445284885112L;
+
+	public ImageProcessorImpl() throws RemoteException {
+		super();
+	}
 
 	@Override
 	public SerializableImage convert(SerializableImage source) throws RemoteException {

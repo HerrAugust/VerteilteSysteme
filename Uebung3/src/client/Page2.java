@@ -4,7 +4,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import graphics.SerializableImage;
+import common.SerializableImage;
+
 
 public class Page2 extends JFrame {
 	
