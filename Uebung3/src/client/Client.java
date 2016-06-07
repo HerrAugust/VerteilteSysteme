@@ -1,5 +1,8 @@
 package client;
 
+import graphics.ImageProcessor;
+import graphics.SerializableImage;
+
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -8,13 +11,20 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageFilter;
 import java.io.File;
+import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URL;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 
+import javax.imageio.ImageIO;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.Icon;
@@ -32,6 +42,7 @@ public class Client implements ActionListener {
 	private JLabel path, loadingGIF;
 	private String IPServer;
 	private int portServer;
+	private BufferedImage myimg;
 	
 	public Client(String[] args) {
 		this.IPServer = args[0];
@@ -43,7 +54,7 @@ public class Client implements ActionListener {
 		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
 		
 		frame = new JFrame();
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.setTitle("Client");
 		frame.setSize(300,300); // default size is 0,0
 		frame.setLocation((int)d.getWidth() / 2 - 150, (int)d.getHeight() / 2 - 100); // default is 0,0 (top left corner)
@@ -98,16 +109,42 @@ public class Client implements ActionListener {
 				int userSelection = fileChooser.showSaveDialog(frame);
 				if (userSelection == JFileChooser.APPROVE_OPTION) {
 				    File file = fileChooser.getSelectedFile();
+				    try {
+				    	this.myimg = ImageIO.read(file);
+				    }
+				    catch(IOException ex) {
+				    	System.err.println("Error: you did not select an image?");
+				    	this.frame.dispose();
+				    }
 				    path.setVisible(true);
 				    path.setToolTipText(file.getAbsolutePath());
 				    path.setText(file.getName());
 				}
 				break;
 			case "send":
-				//Communicate image to server (through stub)
-				Socket s = new Socket(this.IPServer, this.portServer);
-				OutputStreamWriter w = new OutputStreamWriter(s.getOutputStream());
-				//Wait synchronously for the modified image
+				//IMPORTANT PART
+				//Communicate image (serialized) to server (through stub) and wait synchronously for result
+				ImageProcessor server = null;
+				SerializableImage editedImage = null;
+				try {
+					server = (ImageProcessor) Naming.lookup("rmi://" + this.IPServer + ":" + this.portServer + "/ImageProcessor");
+					SerializableImage source = new SerializableImage();
+					source.setImage(this.myimg);
+					editedImage = server.convert(source);
+				}
+				catch(RemoteException ex) {
+					System.err.println("Error while communicating with server. Aborting");
+					this.frame.dispose();
+				}
+				catch(MalformedURLException ex) {
+					System.err.println("URL for Java RMI not correct. Aborting");
+					this.frame.dispose();
+				}
+				catch(NotBoundException ex) {
+					System.err.println("Java server not bound. Please try again. Aborting");
+					this.frame.dispose();
+				}
+				//END IMPORTANT PART
 				
 				//Show it on screen
 				new Page2(editedImage);

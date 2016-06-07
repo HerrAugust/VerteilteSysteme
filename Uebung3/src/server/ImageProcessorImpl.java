@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.rmi.RemoteException;
 
+import graphics.ImageProcessor;
 import graphics.SerializableImage;
 
 public class ImageProcessorImpl implements ImageProcessor {

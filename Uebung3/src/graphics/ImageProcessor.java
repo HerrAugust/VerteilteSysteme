@@ -1,6 +1,5 @@
-package server;
+package graphics;
 
-import graphics.*;
 import java.rmi.*;
 
 public interface ImageProcessor extends Remote {
