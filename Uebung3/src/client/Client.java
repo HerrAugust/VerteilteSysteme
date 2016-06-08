@@ -33,10 +33,17 @@ public class Client implements ActionListener {
 	private JFrame frame;
 	private JLabel path, loadingGIF;
 	private int portServer;
+	private String IPServer;
 	private BufferedImage myimg;
 	
 	public Client(String[] args) {
-		this.portServer = Integer.parseInt(args[0]);
+		this.IPServer = args[0];
+		try {
+			this.portServer = Integer.parseInt(args[1]);
+		}
+		catch(NumberFormatException e) {
+			System.err.println("Error, port must be an integer");
+		}
 		this.createGUI();
 	}
 	
@@ -93,7 +100,7 @@ public class Client implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		switch(e.getActionCommand()) {
 			case "choose picture":
-				JFileChooser fileChooser = new JFileChooser();
+				JFileChooser fileChooser = new JFileChooser("/home/agostino/workspace/Verteilte/Uebung3/src/client/CopyrightFreeImages/");
 				fileChooser.setDialogTitle("Image to edit");
 				fileChooser.setVisible(true);
 				int userSelection = fileChooser.showSaveDialog(frame);
@@ -119,13 +126,14 @@ public class Client implements ActionListener {
 				ImageProcessor server = null;
 				SerializableImage editedImage = null;
 				try {
-					server = (ImageProcessor) Naming.lookup("rmi://localhost:" + this.portServer + "/ImageProcessor");
+					server = (ImageProcessor) Naming.lookup("rmi://" + this.IPServer + ":" + this.portServer + "/ImageProcessor");
 					SerializableImage source = new SerializableImage();
 					source.setImage(this.myimg);
 					editedImage = server.convert(source);
 				}
 				catch(RemoteException ex) {
 					System.err.println("Error while communicating with server. Aborting");
+					ex.printStackTrace();
 					this.frame.dispose();
 				}
 				catch(MalformedURLException ex) {
@@ -149,8 +157,8 @@ public class Client implements ActionListener {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		if(args.length != 1) {
-			System.err.println("Error, expected Port of server");
+		if(args.length != 2) {
+			System.err.println("Error, expected IP and Port of server");
 			return;
 		}
 		

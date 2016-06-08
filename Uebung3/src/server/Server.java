@@ -6,12 +6,15 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.AccessControlException;
 
 import common.ImageProcessor;
 
 
 public class Server {
 
+	static ImageProcessor proc;
+	
 	public Server(String[] args) throws RemoteException {
 		System.out.println("Server PID: " + ManagementFactory.getRuntimeMXBean().getName());
 		if(args.length != 1) {
@@ -35,16 +38,21 @@ public class Server {
         try {
         	if(System.getSecurityManager() == null)
         		System.setSecurityManager(new RMISecurityManager());
-        	ImageProcessor proc = new ImageProcessorImpl();
-        	ImageProcessor stub = (ImageProcessor) UnicastRemoteObject.exportObject(proc, port);
+        	proc = new ImageProcessorImpl();
+        	ImageProcessor stub = (ImageProcessor) UnicastRemoteObject.exportObject(proc, port); // create stub
         	Registry registry = LocateRegistry.getRegistry();
-        	registry.rebind("ImageProcessor", stub); // When client will ask for ImageProcessor, the server will know this way to whom to redirect the call 
+        	registry.rebind("ImageProcessor", stub); // When client will ask for ImageProcessor, the server will know this way to whom to redirect the call (ie, returns the stub to client) 
 		} catch (RemoteException e) {
 			System.err.println("Errors while setting up server");
+			e.printStackTrace();
 			System.exit(1);
 		}
+        catch(AccessControlException ex){
+        	System.err.println("Error about security. You did not indicate a valid permissions file as argument!");
+        	return;
+        }
         
-        System.out.println("Server ready on port: ");
+        System.out.println("Server ready on port: " + port);
 	}
 
 	/**
@@ -53,6 +61,7 @@ public class Server {
 	public static void main(String[] args) {
 		try {
 			new Server(args);
+			System.out.println(proc);
 		}
 		catch(RemoteException ex) {
 			System.err.println("Remote exception");

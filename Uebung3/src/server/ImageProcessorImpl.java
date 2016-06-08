@@ -8,10 +8,9 @@ import java.rmi.server.UnicastRemoteObject;
 import common.ImageProcessor;
 import common.SerializableImage;
 
-public class ImageProcessorImpl extends UnicastRemoteObject implements ImageProcessor {
-
-	private static final long serialVersionUID = 2972039445284885112L;
-
+// Note: if ImageProcessorImp extended UnicastRemoteObject, the following would arise http://www.coderanch.com/t/210349/java/java/object-exported-exception-RMI
+public class ImageProcessorImpl implements ImageProcessor {
+	
 	public ImageProcessorImpl() throws RemoteException {
 		super();
 	}
