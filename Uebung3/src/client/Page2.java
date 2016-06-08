@@ -12,8 +12,9 @@ public class Page2 extends JFrame {
 	private static final long serialVersionUID = 8006298895302238219L;
 
 	public Page2(SerializableImage s) {
-		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		this.setTitle("Modified image");
+		this.setSize(600, 600);
 		JLabel lab = new JLabel();
 		lab.setIcon(new ImageIcon(s.getImage()));
 		this.getContentPane().add(lab);

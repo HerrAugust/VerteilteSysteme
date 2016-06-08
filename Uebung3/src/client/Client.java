@@ -76,6 +76,7 @@ public class Client implements ActionListener {
 		URL gifurl = Client.class.getResource("./loading.gif");
 		Icon icon = new ImageIcon(gifurl);
 		loadingGIF = new JLabel(icon);
+		loadingGIF.setVisible(false);
 		
 		groupLayout.setHorizontalGroup(groupLayout.createSequentialGroup()
 				.addComponent(lab)
@@ -121,11 +122,12 @@ public class Client implements ActionListener {
 			case "send":
 				//IMPORTANT PART
 				//Communicate image (serialized) to server (through stub) and wait synchronously for result
-				if(System.getSecurityManager() == null) 
-					System.setSecurityManager(new RMISecurityManager());
 				ImageProcessor server = null;
 				SerializableImage editedImage = null;
 				try {
+					this.loadingGIF.setVisible(true);
+					this.frame.setSize(300, 300);
+					
 					server = (ImageProcessor) Naming.lookup("rmi://" + this.IPServer + ":" + this.portServer + "/ImageProcessor");
 					SerializableImage source = new SerializableImage();
 					source.setImage(this.myimg);
@@ -147,6 +149,9 @@ public class Client implements ActionListener {
 				//END IMPORTANT PART
 				
 				//Show it on screen
+				this.loadingGIF.setVisible(false);
+				Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+				frame.setLocation((int)d.getWidth() / 2 - 150, (int)d.getHeight() / 2 - 100);
 				new Page2(editedImage);
 				break;
 			default: break;

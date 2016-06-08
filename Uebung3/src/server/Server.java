@@ -1,6 +1,8 @@
 package server;
 
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
+import java.rmi.Naming;
 import java.rmi.RMISecurityManager;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
@@ -39,9 +41,7 @@ public class Server {
         	if(System.getSecurityManager() == null)
         		System.setSecurityManager(new RMISecurityManager());
         	proc = new ImageProcessorImpl();
-        	ImageProcessor stub = (ImageProcessor) UnicastRemoteObject.exportObject(proc, port); // create stub
-        	Registry registry = LocateRegistry.getRegistry();
-        	registry.rebind("ImageProcessor", stub); // When client will ask for ImageProcessor, the server will know this way to whom to redirect the call (ie, returns the stub to client) 
+        	Naming.rebind("rmi://localhost:" + port + "/ImageProcessor", proc); // When client will ask for ImageProcessor, the server will know this way to whom to redirect the call (ie, returns the stub to client) 
 		} catch (RemoteException e) {
 			System.err.println("Errors while setting up server");
 			e.printStackTrace();
@@ -50,7 +50,11 @@ public class Server {
         catch(AccessControlException ex){
         	System.err.println("Error about security. You did not indicate a valid permissions file as argument!");
         	return;
-        }
+        } catch (MalformedURLException e) {
+        	System.err.println("Malformed URL");
+			e.printStackTrace();
+			return;
+		}
         
         System.out.println("Server ready on port: " + port);
 	}
@@ -61,7 +65,6 @@ public class Server {
 	public static void main(String[] args) {
 		try {
 			new Server(args);
-			System.out.println(proc);
 		}
 		catch(RemoteException ex) {
 			System.err.println("Remote exception");
