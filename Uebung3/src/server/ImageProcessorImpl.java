@@ -29,9 +29,15 @@ public class ImageProcessorImpl extends UnicastRemoteObject implements ImageProc
 		for(int x = 0; x < img.getWidth(); x++) {
 			for(int y = 0; y < img.getHeight(); y++) {
 				Color oldColor = new Color(img.getRGB(x, y));
-				float red = 2 * oldColor.getRed();
-				float green = 2 * oldColor.getGreen();
-				float blue = (float) 0.5 * oldColor.getBlue();
+				int red = 2 * oldColor.getRed();
+				if(red > 255)
+					red = 255;
+				int green = 2 * oldColor.getGreen();
+				if(green > 255)
+					green = 255;
+				int blue = (int) 0.5 * oldColor.getBlue();
+				if(blue > 255)
+					blue = 255;
 				try {
 					Color newColor = new Color(red, green, blue);
 					newimg.setRGB(x, y, newColor.getRGB());
