@@ -166,7 +166,12 @@ public class Part4 {
 	
 	private void OpenStreetMap(double latitude, double longitude) {
 		String completeSite = "http://staticmap.openstreetmap.de/staticmap.php?center=" + latitude + "," + longitude + "&zoom=13&size=512x512&maptype=osmarenderer";
+		JFrame f = new JFrame("Map for " + latitude + ", " + longitude);
+		f.setSize(400, 400);
 		
+		//HTTPconnection + bufferedReader
+		
+		JLabel png = new JLabel();
 	}
 	
 }
