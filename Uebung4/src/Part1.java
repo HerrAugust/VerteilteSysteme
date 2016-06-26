@@ -39,9 +39,10 @@ public class Part1 {
 	 
 	    // read from the URL
 	    Scanner scan = new Scanner(url.openStream());
-	    String result = new String();
-	    while (scan.hasNextLine())
+	    String result = "";
+	    while (scan.hasNextLine()) {
 	        result += scan.nextLine();
+	    }
 	    scan.close();
 	 
 	    // build a JSON object
