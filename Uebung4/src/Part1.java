@@ -1,9 +1,11 @@
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -31,29 +33,27 @@ public class Part1 {
 	}
 	
 	private void getPublicIP() throws IOException {
-		String url = "https://api.ipify.org?format=json";
-		URL ipifi = new URL(url);
-		
-		Scanner s = new Scanner(ipifi.openStream());
-		String result = "";
-		while (s.hasNext())
-	        result += s.nextLine();
-		s.close();
-		
-		if(result.equals("")) {
-			System.err.println("Error while retriving data from URL. Aborting...");
-			return; 
-		}
-		
-		JSONObject j = new JSONObject(result);
-		String ip = j.getString("ip");
-		this.jl.setText(ip);
+		// build a URL
+	    String s = "http://api.ipify.org?format=json";
+	    URL url = new URL(s);
+	 
+	    // read from the URL
+	    Scanner scan = new Scanner(url.openStream());
+	    String result = new String();
+	    while (scan.hasNextLine())
+	        result += scan.nextLine();
+	    scan.close();
+	 
+	    // build a JSON object
+	    JSONObject obj = new JSONObject(result);
+	    String ip = obj.getString("ip");
+	    this.jl.setText("My public IP is: " + ip);
 	}
 
 	private void generateGUI() {
 		JFrame f = new JFrame("Uebung 4");
 		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		f.setSize(400, 200);
+		f.setMinimumSize(new Dimension(400, 200));
 		f.setLocation( java.awt.Toolkit.getDefaultToolkit().getScreenSize().width / 2 - 200, java.awt.Toolkit.getDefaultToolkit().getScreenSize().height / 2 - 100);
 		
 		Container cp = f.getContentPane();
